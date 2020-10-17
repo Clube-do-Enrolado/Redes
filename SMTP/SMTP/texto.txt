@@ -1,0 +1,3 @@
+Aqui tem apenas um texto
+para testar a transferência de texto
+em servidor SMTP
