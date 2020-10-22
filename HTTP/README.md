@@ -63,4 +63,39 @@ Onde:
     - 4xx - Erro de cliente
     - 5xx - Erro do servidor
 
-- Reason-Phrase: É uma contextualização CURTA do código gerado pelo status-code. Essa contextualização
+- Reason-Phrase: É uma contextualização CURTA do código gerado pelo status-code.
+
+## Considerações feitas em código
+
+Para que o código fique legível para quem quiser trabalhar, foi adotado alguns
+padrões do [PEP-8](https://www.python.org/dev/peps/pep-0008/).
+Esses padrões garantem a correta documentação e entendimento do código.
+A principal alteração considerada é em relação aos comentários.
+
+- Para documentar um método/função em Python, utiliza-se o padrão:
+
+``` python
+def minha_funcao(parametros):
+  """
+  Uma breve descrição da finalidade da função.
+
+  Parameters:
+  nome_do_parametro(tipo): Descrição
+
+  Returns:
+  Descrição do retorno explicitando, se possível,
+  o tipo.
+  """  
+  pass
+```
+
+- Além disso, foi adotado o padrão de nomes:
+  
+  - Classe: Primeira letra maíuscula, sem espaço ou hífen.
+    - Ex: MinhaClasse, Classe
+  - Métodos e funções: tudo minúsculo, podendo utilizar o hífen.
+    - Ex: funcao_teste, funcao
+
+- E por último, foi adotado a utilização de 79 caracteres por linha. O que
+garante que o leitor visualize o código sem a necessidade de realizar o
+scroll horizontal.
