@@ -2,6 +2,11 @@ import socket as socket
 import os
 from ProcessRequest import ProcessRequest
 
+#x[i]: descrição
+#x[0]: são os URI dos diretórios (\\pasta\subpasta\..)
+#x[1]: são os nomes (pasta, outrapasta)
+#x[2]: Todos arquivos alcançaveis a partir do diretório informado.
+#print([x[2] for x in os.walk(".")])
 
 class HTTPServer():
     def __init__(self):
@@ -36,7 +41,7 @@ class HTTPServer():
         #Divide e transforma a string de requisição em um vetor sempre que
         #encontrar espaços entre as palavras.
         splitted_request = request.split()
-
+        
         #Instância da classe responsável por processar as requisições.
         pr = ProcessRequest()
 
@@ -70,7 +75,6 @@ class HTTPServer():
             #Conecta o socket com o HOST e PORTA especificados.
             sokt.bind((self.HOST, self.PORTA))
             print("--> Servidor Executando na porta %s"%(self.PORTA))
-
             while True:
                 #Aceita 1 conexão de requests antes de recusar outras requests.
                 sokt.listen(1)

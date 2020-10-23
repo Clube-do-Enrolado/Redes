@@ -4,6 +4,9 @@ import datetime
 class ProcessRequest:
     def __init__(self):
         #Modelo de header geral para qualquer resposta do servidor.
+        #De acordo com a RFC2616[seção 4.2] - É uma boa prática enviar no
+        #header primeiramente o general-header, depois response/request header
+        #e por último o entity-header.
         self.responseHeader = ("HTTP/1.1 {} {}\r\n"       #Status-Line
                              "Date: {}\r\n"               #general-header
                              "Connection: keep-alive\r\n" #general-header    
@@ -31,12 +34,26 @@ class ProcessRequest:
         datetime.datetime.now(datetime.timezone.utc) #Adquire a data/hora atual
         .strftime("%a, %d %b %Y %H:%M:%S GMT")) #Formata segundo RFC2616[3.3.1]
         
-        if request[0]=="GET":            
+        if request[0]=="GET":
+            '''
+            A partir do os.walk, é possível verificar se o arquivo procurado pelo usuário
+            na request é válido, não sendo necessário o if \\/
+            if request[1]=="/":
+            
+            Envolvendo tudo em um try/catch, se o arquivo existir, continua com a operação.
+            Caso contrário retorna 404.
+
+            Caso encontre o log, porém o arquivo está em uma pasta diferente, 
+            o retorno do walk será [[index.html.log],[index.html]]
+            o que mostra que o index.html mudou de diretório.
+            O que retorna 301 - Moved permanently.
+            '''
+            
             self.responseHeader = self.responseHeader.format('200',
-                                                             'OK',
-                                                             date_server,
-                                                             'Clube do Enrolado',
-                                                             'text/html')
+                                                            'OK',
+                                                            date_server,
+                                                            'Clube do Enrolado',
+                                                            'text/html')
             self.responseBody = """
             <html>
                 <head>
