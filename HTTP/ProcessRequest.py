@@ -1,8 +1,11 @@
+import os
 import datetime
+from itertools import chain
+from Responses import Responses
 
 
 class ProcessRequest:
-    def __init__(self):
+    def __init__(self, serverName):
         #Modelo de header geral para qualquer resposta do servidor.
         #De acordo com a RFC2616[seção 4.2] - É uma boa prática enviar no
         #header primeiramente o general-header, depois response/request header
@@ -12,6 +15,38 @@ class ProcessRequest:
                              "Connection: keep-alive\r\n" #general-header    
                              "Server: {}\r\n"             #response-header
                              "Content-Type: {}\r\n\r\n")  #entity-header
+        
+        #Salva o nome do host do objeto socket.
+        self.SERVER_NAME = serverName
+
+        #Adquire todos arquivos
+        self.serverFiles = [x[2] for x in os.walk(".")]
+
+        #Adquire o nome de todos diretórios
+        self.serverFolders = [x[1] for x in os.walk(".")]
+
+
+
+    def find_file(self, requested_file):
+        """
+        Verifica a existência do arquivo requisitado a partir do root do server.
+        
+        Parameters:
+        requested_file (string): Nome do arquivo desejado para a pesquisa.
+
+        Returns:
+        (bool): True (caso arquivo encontrado) ou False (caso não encontre).
+        """
+
+        #Simples for para verificação se o requested_file é diretório ou não
+        #ainda resta implementação para o directory-listing.
+        for key in range(len(self.serverFolders)):
+            print(self.serverFolders[key])            
+            if requested_file in self.serverFolders[key]:
+                print("O %s É diretório"%requested_file)
+                
+        return requested_file in chain(*self.serverFiles)
+
 
     def response(self, request):
         """
@@ -30,9 +65,11 @@ class ProcessRequest:
         
         """
         
+        
         date_server = ( #Variável responsável por armazenar a data
         datetime.datetime.now(datetime.timezone.utc) #Adquire a data/hora atual
         .strftime("%a, %d %b %Y %H:%M:%S GMT")) #Formata segundo RFC2616[3.3.1]
+        
         
         if request[0]=="GET":
             '''
@@ -48,36 +85,12 @@ class ProcessRequest:
             o que mostra que o index.html mudou de diretório.
             O que retorna 301 - Moved permanently.
             '''
-            
-            self.responseHeader = self.responseHeader.format('200',
-                                                            'OK',
-                                                            date_server,
-                                                            'Clube do Enrolado',
-                                                            'text/html')
-            self.responseBody = """
-            <html>
-                <head>
-                    <title>Home</title>
-                </head>
-                <style>
-                    div{
-                        margin: 0 auto;
-                        width: "80%";
-                        height: "80%";
-                        border-radius: 50px;
-                        align-items: center;
-                    }
 
-                    h1{
-                        font-weight: 800;
-                        color: crimson;
-                    }
-                </style>
-                <body>
-                    <div>
-                        <h1>Tela inicial</h1>
-                    </div>
-                </body>
-            </html>
-            """
+            if self.find_file(request[1].split('/')[-1]):
+                self.responseHeader, self.responseBody = Responses(self.SERVER_NAME).OK()
+                
+            else:
+                self.responseHeader, self.responseBody = Responses(self.SERVER_NAME).NotFound()
+            
+            
         return self.responseHeader, self.responseBody

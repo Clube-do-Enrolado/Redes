@@ -4,7 +4,7 @@ from ProcessRequest import ProcessRequest
 
 #x[i]: descrição
 #x[0]: são os URI dos diretórios (\\pasta\subpasta\..)
-#x[1]: são os nomes (pasta, outrapasta)
+#x[1]: são os nomes dos diretórios (pasta, outrapasta)
 #x[2]: Todos arquivos alcançaveis a partir do diretório informado.
 #print([x[2] for x in os.walk(".")])
 
@@ -12,6 +12,7 @@ class HTTPServer():
     def __init__(self):
         self.PORTA = 8080
         self.HOST = "127.0.0.1"
+        self.SERVER_NAME = socket.gethostname()
         self.main()
 
     def process_connection(self, sokt):
@@ -43,7 +44,7 @@ class HTTPServer():
         splitted_request = request.split()
         
         #Instância da classe responsável por processar as requisições.
-        pr = ProcessRequest()
+        pr = ProcessRequest(self.SERVER_NAME)
 
         #Adquire as respostas do método response.
         responseHeader, responseBody = pr.response(splitted_request)
