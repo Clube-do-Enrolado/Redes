@@ -1,12 +1,5 @@
 import socket as socket
-import os
 from ProcessRequest import ProcessRequest
-
-#x[i]: descrição
-#x[0]: são os URI dos diretórios (\\pasta\subpasta\..)
-#x[1]: são os nomes dos diretórios (pasta, outrapasta)
-#x[2]: Todos arquivos alcançaveis a partir do diretório informado.
-#print([x[2] for x in os.walk(".")])
 
 class HTTPServer():
     def __init__(self):
@@ -37,7 +30,7 @@ class HTTPServer():
         #Recebe a requisição do cliente em bits e transforma-a com o decode()
         #para string.
         request = conec.recv(2048).decode()
-        print(request)
+        print("DEBUG:",request)
 
         #Divide e transforma a string de requisição em um vetor sempre que
         #encontrar espaços entre as palavras.
@@ -47,7 +40,7 @@ class HTTPServer():
         pr = ProcessRequest(self.SERVER_NAME)
 
         #Adquire as respostas do método response.
-        responseHeader, responseBody = pr.response(splitted_request)
+        responseHeader, responseBody = pr.process(splitted_request)
 
         #Envia o Header da resposta
         conec.sendall(bytes(responseHeader.encode("UTF-8")))
@@ -55,7 +48,8 @@ class HTTPServer():
         #Verifica se o corpo da mensagem não é nulo
         if responseBody is not None:
             #E então o envia
-            conec.sendall(bytes(responseBody.encode("UTF-8")))
+            conec.sendall(responseBody)
+        
     
     def main(self):
         """

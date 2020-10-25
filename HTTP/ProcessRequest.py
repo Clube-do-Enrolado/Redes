@@ -1,21 +1,11 @@
 import os
-import datetime
 from itertools import chain
 from Responses import Responses
 
 
 class ProcessRequest:
     def __init__(self, serverName):
-        #Modelo de header geral para qualquer resposta do servidor.
-        #De acordo com a RFC2616[seção 4.2] - É uma boa prática enviar no
-        #header primeiramente o general-header, depois response/request header
-        #e por último o entity-header.
-        self.responseHeader = ("HTTP/1.1 {} {}\r\n"       #Status-Line
-                             "Date: {}\r\n"               #general-header
-                             "Connection: keep-alive\r\n" #general-header    
-                             "Server: {}\r\n"             #response-header
-                             "Content-Type: {}\r\n\r\n")  #entity-header
-        
+
         #Salva o nome do host do objeto socket.
         self.SERVER_NAME = serverName
 
@@ -25,7 +15,11 @@ class ProcessRequest:
         #Adquire o nome de todos diretórios
         self.serverFolders = [x[1] for x in os.walk(".")]
 
+        #Cria instância da classe de respostas
+        # para uso no método de processamento
+        self.response = Responses(self.SERVER_NAME)
 
+        self.extensoes_suportadas = ['html','']
 
     def find_file(self, requested_file):
         """
@@ -41,14 +35,14 @@ class ProcessRequest:
         #Simples for para verificação se o requested_file é diretório ou não
         #ainda resta implementação para o directory-listing.
         for key in range(len(self.serverFolders)):
-            print(self.serverFolders[key])            
+            #print(self.serverFolders[key])            
             if requested_file in self.serverFolders[key]:
                 print("O %s É diretório"%requested_file)
                 
         return requested_file in chain(*self.serverFiles)
 
 
-    def response(self, request):
+    def process(self, request):
         """
         Cria a resposta apropriada para uma dada requisição.
 
@@ -63,15 +57,15 @@ class ProcessRequest:
         (string,string): A resposta do servidor para uma dada requisição.
                          Sendo o primeiro o Header e o segundo o Body.
         
-        """
-        
-        
-        date_server = ( #Variável responsável por armazenar a data
-        datetime.datetime.now(datetime.timezone.utc) #Adquire a data/hora atual
-        .strftime("%a, %d %b %Y %H:%M:%S GMT")) #Formata segundo RFC2616[3.3.1]
-        
-        
-        if request[0]=="GET":
+        """     
+        print("DEBUG:",request)
+        if request is None:
+            self.responseHeader, self.responseBody = self.response.BadRequest()
+
+        elif request[0]=="GET":
+            print("DEBUG: GET Method")
+            #Adquire somente o request-uri após o /.
+            requested_file = request[1].split('/')[-1]
             '''
             A partir do os.walk, é possível verificar se o arquivo procurado pelo usuário
             na request é válido, não sendo necessário o if \\/
@@ -85,12 +79,26 @@ class ProcessRequest:
             o que mostra que o index.html mudou de diretório.
             O que retorna 301 - Moved permanently.
             '''
+            
+            #Se o arquivo desejado na requisição for o root "/"
+            #De acordo com a RFC, essa requisição deve carregar a página base.
+            if(request[1] == "/"):
+                self.responseHeader, self.responseBody = self.response.OK('home.html')
 
-            if self.find_file(request[1].split('/')[-1]):
-                self.responseHeader, self.responseBody = Responses(self.SERVER_NAME).OK()
-                
+            #Se o arquivo existir nos diretórios do servidor, entra na condição.
+            elif (self.find_file(requested_file)):
+                #Se o arquivo desejado possui sua extensão suportada pelo
+                #servidor (isso é, arquivos que o método OK da classe Responses
+                #consegue ler e retornar).
+                if(requested_file.split('.')[-1] in self.extensoes_suportadas):
+                    self.responseHeader, self.responseBody = self.response.OK(requested_file)
+
+                #Se não é uma extensão suportada, retorne Not Found.
+                else:
+                    self.responseHeader, self.responseBody = self.response.NotFound()
+
             else:
-                self.responseHeader, self.responseBody = Responses(self.SERVER_NAME).NotFound()
+                self.responseHeader, self.responseBody = self.response.NotFound()
             
-            
+        print(self.responseHeader,self.responseBody)
         return self.responseHeader, self.responseBody
