@@ -19,7 +19,7 @@ class ProcessRequest:
         # para uso no método de processamento
         self.response = Responses(self.SERVER_NAME)
 
-        self.extensoes_suportadas = ['html','']
+        self.extensoes_suportadas = ['html','ico']
 
     def find_file(self, requested_file):
         """
@@ -58,12 +58,10 @@ class ProcessRequest:
                          Sendo o primeiro o Header e o segundo o Body.
         
         """     
-        print("DEBUG:",request)
-        if request is None:
+        if not request:
             self.responseHeader, self.responseBody = self.response.BadRequest()
 
         elif request[0]=="GET":
-            print("DEBUG: GET Method")
             #Adquire somente o request-uri após o /.
             requested_file = request[1].split('/')[-1]
             '''
@@ -79,7 +77,10 @@ class ProcessRequest:
             o que mostra que o index.html mudou de diretório.
             O que retorna 301 - Moved permanently.
             '''
-            
+            print("DEBUG: ",request[1])
+            print("DEBUG: ",request[1].replace('/','\\'))
+            print("DEBUG: ",os.getcwd()+request[1].replace('/','\\'))
+            print("DEBUG: ",os.getcwd())
             #Se o arquivo desejado na requisição for o root "/"
             #De acordo com a RFC, essa requisição deve carregar a página base.
             if(request[1] == "/"):
@@ -87,11 +88,12 @@ class ProcessRequest:
 
             #Se o arquivo existir nos diretórios do servidor, entra na condição.
             elif (self.find_file(requested_file)):
+
                 #Se o arquivo desejado possui sua extensão suportada pelo
                 #servidor (isso é, arquivos que o método OK da classe Responses
                 #consegue ler e retornar).
                 if(requested_file.split('.')[-1] in self.extensoes_suportadas):
-                    self.responseHeader, self.responseBody = self.response.OK(requested_file)
+                    self.responseHeader, self.responseBody = self.response.OK(os.getcwd()+request[1].replace('/','\\'))
 
                 #Se não é uma extensão suportada, retorne Not Found.
                 else:
@@ -99,6 +101,6 @@ class ProcessRequest:
 
             else:
                 self.responseHeader, self.responseBody = self.response.NotFound()
-            
-        print(self.responseHeader,self.responseBody)
+        
+        print(self.responseHeader, self.responseBody)
         return self.responseHeader, self.responseBody

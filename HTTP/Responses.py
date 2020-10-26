@@ -52,22 +52,25 @@ class Responses:
             "\t</body>\n"
             "</html>\n")
 
-    def open_file(self, name):
+    def open_file(self, filepath):
         """
         Método que lê um arquivo para construção da resposta.
         Antes de invocar o método, é certo que esse arquivo
         existe.
 
         Parameters:
-        name (string): Nome do arquivo desejado para abertura.
+        filepath (string): Diretório do arquivo desejado para abertura.
 
         Returns:
         (binary): Conteúdo do arquivo em binário.
         """
-        with open(name,'rb') as archive:
-            content = archive.read()
-            archive.close()
-        return content
+        try:
+            with open(filepath,'rb') as archive:
+                content = archive.read()
+                archive.close()
+            return content
+        except:
+            return self.NotFound()
 
     def OK(self, filepath):
         """

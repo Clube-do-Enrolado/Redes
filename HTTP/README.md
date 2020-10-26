@@ -1,6 +1,17 @@
 # Implementação do protocolo HTTP 1.1
 
-## Funcionalidades do servidor
+## Funcionalidades até o momento
+
+O servidor é capaz de:
+
+- [] Enviar um arquivo para o cliente (utilizando GET).
+  - [X] Tratar o caminho do arquivo.
+  - [] Tratar vários tipos de arquivos no GET (considerar mimetype)
+  - [] Tratar caso o "arquivo" seja um diretório.
+  - [X] Tratar erro 404.
+  - [] Tratar erro 301.
+
+## Funcionalidades do servidor requeridas
 
 O servidor deve ser capaz de responder corretamente à diferentes tipos de requisições feitas pelo cliente. Como:
 
