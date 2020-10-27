@@ -4,12 +4,10 @@
 
 O servidor é capaz de:
 
-- [] Enviar um arquivo para o cliente (utilizando GET).
+- [X] Enviar um arquivo para o cliente (utilizando GET).
   - [X] Tratar o caminho do arquivo.
-  - [] Tratar vários tipos de arquivos no GET (considerar mimetype)
-  - [] Tratar caso o "arquivo" seja um diretório.
+  - [X] Tratar vários tipos de arquivos no GET (considerar mimetype)
   - [X] Tratar erro 404.
-  - [] Tratar erro 301.
 
 ## Funcionalidades do servidor requeridas
 

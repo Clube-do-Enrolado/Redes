@@ -1,4 +1,5 @@
 import datetime
+import NetUtils as NetUtils
 
 
 class Responses:
@@ -52,46 +53,34 @@ class Responses:
             "\t</body>\n"
             "</html>\n")
 
-    def open_file(self, filepath):
-        """
-        Método que lê um arquivo para construção da resposta.
-        Antes de invocar o método, é certo que esse arquivo
-        existe.
+        self.imageExtensions = ['jpeg','jpg','png','gif']
 
-        Parameters:
-        filepath (string): Diretório do arquivo desejado para abertura.
-
-        Returns:
-        (binary): Conteúdo do arquivo em binário.
-        """
-        try:
-            with open(filepath,'rb') as archive:
-                content = archive.read()
-                archive.close()
-            return content
-        except:
-            return self.NotFound()
-
-    def OK(self, filepath):
+    def OK(self, filepath, ext):
         """
         Constrói a mensagem para um arquivo encontrado.
 
         Parameters:
         filepath (string): Caminho do arquivo que existe no diretório.
+        ext (string): Extensão do arquivo procurado.
 
         Returns:
         (string, string): Header e corpo da resposta.
         """
-        return (
-            self.response_general_header.format(
-                '200',
-                'OK',
-                self.DATE_SERVER,
-                self.SERVER_NAME,
-                'text/html'
-                ),
-            self.open_file(filepath)
-        )
+        content = NetUtils.open_file(filepath)
+
+        if content is not None:
+            return (
+                self.response_general_header.format(
+                    '200',
+                    'OK',
+                    self.DATE_SERVER,
+                    self.SERVER_NAME,
+                    '{}{}'.format('image',ext) if ext in self.imageExtensions else 'text/html' 
+                    ),
+                content
+            )
+        else:
+            return self.NotFound()
 
     def NotFound(self):
         """
