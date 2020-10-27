@@ -35,7 +35,8 @@ class Responses:
                              "Date: {}\r\n"                  #general-header
                              "Connection: keep-alive\r\n"    #general-header    
                              "Server: {}\r\n"                #response-header
-                             "Content-Type: {}\r\n\r\n")         #entity-header
+                             "Content-Type: {}\r\n"          #entity-header
+                             "Content-Length: {}\r\n\r\n")   #entity-header         
 
         self.DATE_SERVER = ( #Variável responsável por armazenar a data
         datetime.datetime.now(datetime.timezone.utc) #Adquire a data/hora atual
@@ -66,7 +67,7 @@ class Responses:
         Returns:
         (string, string): Header e corpo da resposta.
         """
-        content = NetUtils.open_file(filepath)
+        content, size = NetUtils.open_file(filepath)
 
         if content is not None:
             return (
@@ -75,7 +76,8 @@ class Responses:
                     'OK',
                     self.DATE_SERVER,
                     self.SERVER_NAME,
-                    '{}{}'.format('image',ext) if ext in self.imageExtensions else 'text/html' 
+                    '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
+                    size
                     ),
                 content
             )
@@ -89,18 +91,21 @@ class Responses:
         Returns:
         (string, string): Header e corpo da resposta.
         """
+        content =  bytes(self.response_general_body.format(
+                "404 Not Found", "404 - Not Found",
+                "O arquivo requisitado ao servidor nao existe :("
+                ).encode("UTF-8"))
         return (
             self.response_general_header.format(
                 '404',
                 'Not Found',
                 self.DATE_SERVER,
                 self.SERVER_NAME,
-                'text/html'
+                'text/html',
+                len(content)
                 ),
-            bytes(self.response_general_body.format(
-                "404 Not Found", "404 - Not Found",
-                "O arquivo requisitado ao servidor nao existe :("
-            ).encode("UTF-8")))
+            content
+           )
 
     def BadRequest(self):
         """
@@ -109,15 +114,18 @@ class Responses:
         Returns:
         (string, string): Header e corpo da resposta.
         """
+        content = bytes(self.response_general_body.format(
+                "400 Bad Request", "400 - Bad Request",
+                "A requisição enviada nao pode ser atendida pelo servidor."
+                ).encode("UTF-8"))
         return (
             self.response_general_header.format(
                 '400',
                 'Bad Request',
                 self.DATE_SERVER,
                 self.SERVER_NAME,
-                'text/html'
+                'text/html',
+                len(content)
                 ),
-            bytes(self.response_general_body.format(
-                "400 Bad Request", "400 - Bad Request",
-                "A requisição enviada nao pode ser atendida pelo servidor."
-            ).encode("UTF-8")))
+            content
+            )

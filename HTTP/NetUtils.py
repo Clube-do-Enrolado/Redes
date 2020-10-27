@@ -47,8 +47,7 @@ def get_file_path(filename):
     Returns:
     (string): Caminho absoluto do arquivo.
     """
-    arcPath = os.getcwd()
-    return os.path.join(arcPath, filename.replace("/", ""))
+    return "{}{}".format(os.getcwd(), filename.replace('/','\\'))
 
 def open_file(filepath):
     """
@@ -61,11 +60,13 @@ def open_file(filepath):
 
     Returns:
     (binary): Conteúdo do arquivo em binário.
+    (int): 
     """
     try:
         with open(filepath,'rb') as archive:
             content = archive.read()
+            content_size = archive.seek(0, os.SEEK_END)
             archive.close()
-        return content
+        return content, content_size
     except:
-        return None
+        return None, None
