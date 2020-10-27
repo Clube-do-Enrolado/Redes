@@ -47,7 +47,8 @@ def get_file_path(filename):
     Returns:
     (string): Caminho absoluto do arquivo.
     """
-    return "{}{}".format(os.getcwd(), filename.replace('/','\\'))
+    arcPath = os.getcwd()
+    return os.path.join(arcPath, filename.replace("/", ""))
 
 def open_file(filepath):
     """
