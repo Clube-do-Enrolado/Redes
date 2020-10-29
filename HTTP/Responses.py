@@ -146,3 +146,35 @@ class Responses:
             content
             )
     
+    def Created(self, ext):
+        content = bytes(self.response_general_body.format(
+                "201 Created", "201 - Created",
+                "O arquivo foi criado no servidor com sucesso :)"
+                ).encode("UTF-8"))
+        return (
+            self.response_general_header.format(
+                '201',
+                'Created',
+                self.DATE_SERVER,
+                self.SERVER_NAME,
+                '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
+                len(content)
+                ),
+            content
+            )
+    
+    def NoContent(self, ext):
+        content = bytes(
+                ""
+                .encode("UTF-8"))
+        return (
+            self.response_general_header.format(
+                '204',
+                'No Content',
+                self.DATE_SERVER,
+                self.SERVER_NAME,
+                '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
+                len(content)
+                ),
+            content
+            )

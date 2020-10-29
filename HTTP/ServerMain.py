@@ -30,7 +30,21 @@ class HTTPServer():
         #Recebe a requisição do cliente em bits e transforma-a com o decode()
         #para string.
         request = conec.recv(4096).decode()
+        
         print("DEBUG:",request)
+
+        #Verifica se existe um corpo para receber na mensagem
+        #(Geralmente em método PUT)
+        if request.find('Content-Length') > -1:
+            body = bytes("".encode("UTF-8"))
+            body_splitted = request.split()
+            index_length = body_splitted.index("Content-Length:")+1
+            body_length = int(body_splitted[index_length])
+
+            while body_length > 0:
+                body += conec.recv(2048)
+                body_length -= 2048
+
 
         #Divide e transforma a string de requisição em um vetor sempre que
         #encontrar espaços entre as palavras.
@@ -40,7 +54,7 @@ class HTTPServer():
         pr = ProcessRequest(self.SERVER_NAME)
 
         #Adquire as respostas do método response.
-        responseHeader, responseBody = pr.process(splitted_request)
+        responseHeader, responseBody = pr.process(splitted_request, body)
 
         #Envia o Header da resposta
         conec.sendall(bytes(responseHeader.encode("UTF-8")))

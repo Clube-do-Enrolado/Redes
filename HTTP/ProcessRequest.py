@@ -16,7 +16,7 @@ class ProcessRequest:
         #Extensões suportadas pelo servidor.
         self.extensoes_suportadas = ['html','jpeg','png','jpg']
 
-    def process(self, request):
+    def process(self, request, body):
         """
         Cria a resposta apropriada para uma dada requisição.
 
@@ -85,11 +85,12 @@ class ProcessRequest:
 
             #Adquire a extensão do arquivo solicitado
             requested_extension = request[1].split('.')[-1]
-            print(request)
 
-            self.responseHeader, self.responseBody = self.response.Continue() 
-
-            NetUtils.createFile(request[1])
+            if body:
+                NetUtils.createFile(requested_file, body)
+                #self.responseHeader, self.responseBody = self.response.Created(requested_extension)
+            else:
+                self.responseHeader, self.responseBody = self.response.NoContent(requested_extension)
         
         else:
             self.responseHeader, self.responseBody = self.response.BadRequest()

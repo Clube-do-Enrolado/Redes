@@ -71,5 +71,7 @@ def open_file(filepath):
     except:
         return None, None
 
-def createFile(file_to_create):
-    pass
+def createFile(file, binary_content):
+    with open(file,'wb') as newFile:
+        newFile.write(binary_content)
+        newFile.close()
