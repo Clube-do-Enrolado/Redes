@@ -70,3 +70,6 @@ def open_file(filepath):
         return content, content_size
     except:
         return None, None
+
+def createFile(file_to_create):
+    pass

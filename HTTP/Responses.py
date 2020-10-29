@@ -129,3 +129,20 @@ class Responses:
                 ),
             content
             )
+
+    def Continue(self):
+        content = bytes(
+                ""
+                .encode("UTF-8"))
+        return (
+            self.response_general_header.format(
+                '100',
+                'Continue',
+                self.DATE_SERVER,
+                self.SERVER_NAME,
+                '',
+                ''
+                ),
+            content
+            )
+    

@@ -78,6 +78,21 @@ class ProcessRequest:
 
             else:
                 self.responseHeader, self.responseBody = self.response.NotFound()
+
+        elif request[0]=="PUT":
+            #Adquire somente o request-uri após o /.
+            requested_file = request[1].split('/')[-1]
+
+            #Adquire a extensão do arquivo solicitado
+            requested_extension = request[1].split('.')[-1]
+            print(request)
+
+            self.responseHeader, self.responseBody = self.response.Continue() 
+
+            NetUtils.createFile(request[1])
+        
+        else:
+            self.responseHeader, self.responseBody = self.response.BadRequest()
         
         print(self.responseHeader)
         return self.responseHeader, self.responseBody

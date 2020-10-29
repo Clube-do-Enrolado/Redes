@@ -29,7 +29,7 @@ class HTTPServer():
 
         #Recebe a requisição do cliente em bits e transforma-a com o decode()
         #para string.
-        request = conec.recv(2048).decode()
+        request = conec.recv(4096).decode()
         print("DEBUG:",request)
 
         #Divide e transforma a string de requisição em um vetor sempre que
