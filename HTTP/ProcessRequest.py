@@ -14,7 +14,7 @@ class ProcessRequest:
         self.response = Responses(self.SERVER_NAME)
 
         #Extensões suportadas pelo servidor.
-        self.extensoes_suportadas = ['html','jpeg','png','jpg']
+        self.extensoes_suportadas = ['html','jpeg','png','jpg','gif']
 
     def process(self, request, body):
         """
@@ -34,6 +34,9 @@ class ProcessRequest:
         """     
         if not request:
             self.responseHeader, self.responseBody = self.response.BadRequest()
+        
+        elif request[2] != "HTTP/1.1":
+            self.responseHeader, self.responseBody = self.response.HTTPVersionNotSupported()
 
         elif request[0]=="GET":
             #Adquire somente o request-uri após o /.
@@ -41,20 +44,6 @@ class ProcessRequest:
 
             #Adquire a extensão do arquivo solicitado
             requested_extension = request[1].split('.')[-1]
-
-            '''
-            A partir do os.walk, é possível verificar se o arquivo procurado pelo usuário
-            na request é válido, não sendo necessário o if \\/
-            if request[1]=="/":
-            
-            Envolvendo tudo em um try/catch, se o arquivo existir, continua com a operação.
-            Caso contrário retorna 404.
-
-            Caso encontre o log, porém o arquivo está em uma pasta diferente, 
-            o retorno do walk será [[index.html.log],[index.html]]
-            o que mostra que o index.html mudou de diretório.
-            O que retorna 301 - Moved permanently.
-            '''
 
             #Se o arquivo desejado na requisição for o root "/"
             #De acordo com a RFC, essa requisição deve carregar a página base.
@@ -76,6 +65,7 @@ class ProcessRequest:
                 else:
                     self.responseHeader, self.responseBody = self.response.NotFound()
 
+            #O arquivo requisitado não existe de fato no servidor.
             else:
                 self.responseHeader, self.responseBody = self.response.NotFound()
 
@@ -86,14 +76,16 @@ class ProcessRequest:
             #Adquire a extensão do arquivo solicitado
             requested_extension = request[1].split('.')[-1]
 
+            #Se na requisição houver corpo da mensagem
             if body:
+
                 NetUtils.createFile(requested_file, body)
-                #self.responseHeader, self.responseBody = self.response.Created(requested_extension)
+                self.responseHeader, self.responseBody = self.response.Created(requested_extension)
             else:
                 self.responseHeader, self.responseBody = self.response.NoContent(requested_extension)
         
         else:
             self.responseHeader, self.responseBody = self.response.BadRequest()
         
-        print(self.responseHeader)
+        print("ResponseHeader:\n ",self.responseHeader)
         return self.responseHeader, self.responseBody

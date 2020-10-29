@@ -8,9 +8,12 @@ class Responses:
         para o cliente.
 
         Methods:
-        open_file: Método de utilidade para algumas respostas.
-        OK: Formata a resposta para 200 OK, juntamente com o corpo.
-        NotFound: Formata a resposta para 404 not Found, juntamente com o corpo.
+        OK: Formata a resposta para 200 OK.
+        Created: Formata a resposta para 201 Created.
+        NoContent: Formata a resposta para 204 No Content.
+        BadRequest: Formata a resposta para 400 Bad Request.
+        NotFound: Formata a resposta para 404 not Found.
+        HTTPVersionNotSupported: Formata a resposta para 505 HTTP Version Not Supported.
     """
 
     def __init__(self, serverName):
@@ -56,9 +59,17 @@ class Responses:
 
         self.imageExtensions = ['jpeg','jpg','png','gif']
 
+
+    #+---------------------------------------------------------+
+    #|              Successful 2xx Messages Methods            |
+    #+---------------------------------------------------------+
+
+
     def OK(self, filepath, ext):
         """
-        Constrói a mensagem para um arquivo encontrado.
+        Constrói a mensagem para um arquivo encontrado no servidor.
+        Esse método, diferentemente das outras respostas, envia um
+        arquivo que realmente existe no servidor.
 
         Parameters:
         filepath (string): Caminho do arquivo que existe no diretório.
@@ -83,6 +94,63 @@ class Responses:
             )
         else:
             return self.NotFound()
+    
+    def Created(self, ext):
+        """
+        Constrói a mensagem informando ao cliente que o arquivo
+        foi criado com sucesso.
+
+        Parameters:
+        ext (string): Extensão do arquivo criado.
+
+        Returns:
+        (string, string): Header e corpo da resposta.
+        """
+        content = bytes(self.response_general_body.format(
+                "201 Created", "201 - Created",
+                "O arquivo foi criado no servidor com sucesso :)"
+                ).encode("UTF-8"))
+        return (
+            self.response_general_header.format(
+                '201',
+                'Created',
+                self.DATE_SERVER,
+                self.SERVER_NAME,
+                '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
+                len(content)
+                ),
+            content
+            )
+    
+    def NoContent(self, ext):
+        """
+        Mensagem caso o arquivo seja criado, porém sem nenhum conteúdo.
+
+        Parameters:
+        ext (string): Extensão do arquivo criado.
+
+        Returns:
+        (string, string): Header e corpo da resposta.
+        """        
+        content = bytes("".encode("UTF-8"))
+        return (
+            self.response_general_header.format(
+                '204',
+                'No Content',
+                self.DATE_SERVER,
+                self.SERVER_NAME,
+                '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
+                len(content)
+                ),
+            content
+        )
+
+
+
+
+    #+---------------------------------------------------------+
+    #|            Client Error 4xx Messages Methods            |
+    #+---------------------------------------------------------+
 
     def NotFound(self):
         """
@@ -109,14 +177,14 @@ class Responses:
 
     def BadRequest(self):
         """
-        Constrói a mensagem para um arquivo não encontrado
+        Constrói a mensagem para uma requisição feita incorretamente.
 
         Returns:
         (string, string): Header e corpo da resposta.
         """
         content = bytes(self.response_general_body.format(
                 "400 Bad Request", "400 - Bad Request",
-                "A requisição enviada nao pode ser atendida pelo servidor."
+                "A requisicao enviada nao pode ser atendida pelo servidor."
                 ).encode("UTF-8"))
         return (
             self.response_general_header.format(
@@ -130,50 +198,30 @@ class Responses:
             content
             )
 
-    def Continue(self):
-        content = bytes(
-                ""
-                .encode("UTF-8"))
-        return (
-            self.response_general_header.format(
-                '100',
-                'Continue',
-                self.DATE_SERVER,
-                self.SERVER_NAME,
-                '',
-                ''
-                ),
-            content
-            )
-    
-    def Created(self, ext):
+
+
+
+    #+---------------------------------------------------------+
+    #|            Server Errors 5xx Messages Methods           |
+    #+---------------------------------------------------------+
+    def HTTPVersionNotSupported(self):
+        """
+        Constrói a mensagem para erro de versão do HTTP.
+
+        Returns:
+        (string, string): Header e corpo da resposta.
+        """
         content = bytes(self.response_general_body.format(
-                "201 Created", "201 - Created",
-                "O arquivo foi criado no servidor com sucesso :)"
+                "505 HTTP Version Not Supported", "505 HTTP - Version Not Supported",
+                "A versão especificada no método não é compatível com o servidor."
                 ).encode("UTF-8"))
         return (
             self.response_general_header.format(
-                '201',
-                'Created',
+                '505',
+                'HTTP Version Not Supported',
                 self.DATE_SERVER,
                 self.SERVER_NAME,
-                '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
-                len(content)
-                ),
-            content
-            )
-    
-    def NoContent(self, ext):
-        content = bytes(
-                ""
-                .encode("UTF-8"))
-        return (
-            self.response_general_header.format(
-                '204',
-                'No Content',
-                self.DATE_SERVER,
-                self.SERVER_NAME,
-                '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
+                'text/html',
                 len(content)
                 ),
             content

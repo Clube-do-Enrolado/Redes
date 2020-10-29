@@ -32,11 +32,12 @@ class HTTPServer():
         request = conec.recv(4096).decode()
         
         print("DEBUG:",request)
+        
+        body = bytes("".encode("UTF-8"))
 
         #Verifica se existe um corpo para receber na mensagem
         #(Geralmente em método PUT)
         if request.find('Content-Length') > -1:
-            body = bytes("".encode("UTF-8"))
             body_splitted = request.split()
             index_length = body_splitted.index("Content-Length:")+1
             body_length = int(body_splitted[index_length])
@@ -44,6 +45,9 @@ class HTTPServer():
             while body_length > 0:
                 body += conec.recv(2048)
                 body_length -= 2048
+                conec.sendall(bytes(
+                    'HTTP/1.1 100 Continue\r\nServer:{}\r\n\r\n'.format(self.SERVER_NAME).encode("UTF-8")
+                    ))
 
 
         #Divide e transforma a string de requisição em um vetor sempre que
