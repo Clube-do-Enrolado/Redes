@@ -89,6 +89,7 @@ class ProcessRequest:
                     self.responseHeader, self.responseBody = (
                         self.response.OK(NetUtils.get_file_path(request[1]),requested_extension)
                     )
+                    
 
                 #Caso o arquivo exista nos diretórios do servidor, mas não foi informado
                 #um corpo na requisição
@@ -97,20 +98,22 @@ class ProcessRequest:
                     #Deve-se retornar o código 204 No Content para a alteração do arquivo
                     #com um conteúdo vazio.
                     self.responseHeader, self.responseBody = self.response.NoContent(requested_extension)
+                    
                 
                 #Caso não exista o arquivo, cria-se um novo.
                 else:
 
                     #Retornando o 201 Created com o conteúdo dado (vazio ou não).
                     self.responseHeader, self.responseBody = self.response.Created(requested_extension)
-            
+                    
+                    
             #Caso a requisição foi destinada à outro diretório,
             #o arquivo será criado de qualquer forma no diretório "userdata"
             #e a resposta 301 Moved Permanently será exibida com o diretório
             #correto para o arquivo.
             else:
                 self.responseHeader, self.responseBody = self.response.MovedPermanently(requested_file)
-        
+            NetUtils.refresh_known_files()
         else:
             self.responseHeader, self.responseBody = self.response.BadRequest()
         

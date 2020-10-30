@@ -83,11 +83,6 @@ def createFile(file, binary_content):
     Returns:
     (bool): True caso seja criado no diretório correto, False caso necessite de redirecionamento.
     """
-    global serverFiles
-    #Atualiza os arquivos de servidor sempre que for requisitado
-    #a criação de um arquivo.
-    serverFiles = [x[2] for x in os.walk(".")]
-
     path = file.split('/')
 
     with open("./userdata/"+file.split('/')[-1],'wb') as newFile:
@@ -98,3 +93,9 @@ def createFile(file, binary_content):
         return True
     else:
         return False
+
+def refresh_known_files():
+    global serverFiles
+    #Atualiza os arquivos de servidor sempre que for requisitado
+    #a criação de um arquivo.
+    serverFiles = [x[2] for x in os.walk(".")]
