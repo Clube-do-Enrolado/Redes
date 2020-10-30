@@ -39,7 +39,7 @@ class Responses:
                              "Connection: keep-alive\r\n"    #general-header    
                              "Server: {}\r\n"                #response-header
                              "Content-Type: {}\r\n"          #entity-header
-                             "Content-Length: {}\r\n\r\n")   #entity-header         
+                             "Content-Length: {}\r\n")       #entity-header         
 
         self.DATE_SERVER = ( #Variável responsável por armazenar a data
         datetime.datetime.now(datetime.timezone.utc) #Adquire a data/hora atual
@@ -89,7 +89,7 @@ class Responses:
                     self.SERVER_NAME,
                     '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
                     size
-                    ),
+                    )+"\r\n",
                 content
             )
         else:
@@ -118,7 +118,7 @@ class Responses:
                 self.SERVER_NAME,
                 '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
                 len(content)
-                ),
+                )+"\r\n",
             content
             )
     
@@ -141,11 +141,32 @@ class Responses:
                 self.SERVER_NAME,
                 '{}/{}'.format('image',ext) if ext in self.imageExtensions else 'text/html',
                 len(content)
-                ),
+                )+"\r\n",
             content
         )
 
+    def MovedPermanently(self, file):
+        """
+        Constrói a mensagem para um arquivo não encontrado
 
+        Returns:
+        (string, string): Header e corpo da resposta.
+        """
+        content =  bytes(self.response_general_body.format(
+                "301 Moved Permanently", "301 Moved Permanently",
+                "O arquivo encontra-se em um diretório diferente."
+                ).encode("UTF-8"))
+        return (
+            self.response_general_header.format(
+                '301',
+                'Moved Permanently',
+                self.DATE_SERVER,
+                self.SERVER_NAME,
+                'text/html',
+                len(content)
+                )+"Location: 127.0.0.1:8080/userdata/{}\r\n".format(file),
+            content
+           )
 
 
     #+---------------------------------------------------------+
@@ -171,7 +192,7 @@ class Responses:
                 self.SERVER_NAME,
                 'text/html',
                 len(content)
-                ),
+                )+"\r\n",
             content
            )
 
@@ -194,7 +215,7 @@ class Responses:
                 self.SERVER_NAME,
                 'text/html',
                 len(content)
-                ),
+                )+"\r\n",
             content
             )
 
@@ -223,6 +244,6 @@ class Responses:
                 self.SERVER_NAME,
                 'text/html',
                 len(content)
-                ),
+                )+"\r\n",
             content
             )

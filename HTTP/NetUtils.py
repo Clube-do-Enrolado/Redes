@@ -26,6 +26,7 @@ def is_folder(requested_file):
             print("O %s É diretório"%requested_file)
 
 def find_file(requested_file):
+    global serverFiles
     """
     Verifica a existência do arquivo requisitado a partir do root do server.
     
@@ -72,6 +73,28 @@ def open_file(filepath):
         return None, None
 
 def createFile(file, binary_content):
-    with open(file,'wb') as newFile:
-        newFile.write(binary_content)
-        newFile.close()
+    """
+    Cria um arquivo após a utilização do método PUT.
+
+    Parameters:
+    file (string): Request-Uri feita pelo cliente.
+    binary_content (string): Corpo da mensagem vinda pela requisição.
+
+    Returns:
+    (bool): True caso seja criado no diretório correto, False caso necessite de redirecionamento.
+    """
+    global serverFiles
+    #Atualiza os arquivos de servidor sempre que for requisitado
+    #a criação de um arquivo.
+    serverFiles = [x[2] for x in os.walk(".")]
+
+    path = file.split('/')
+
+    with open("./userdata/"+file.split('/')[-1],'wb') as newFile:
+            newFile.write(binary_content)
+            newFile.close()
+
+    if path[1] == "userdata" and len(path) == 3:
+        return True
+    else:
+        return False

@@ -14,7 +14,7 @@ class ProcessRequest:
         self.response = Responses(self.SERVER_NAME)
 
         #Extensões suportadas pelo servidor.
-        self.extensoes_suportadas = ['html','jpeg','png','jpg','gif']
+        self.extensoes_suportadas = ['html','txt','md','jpeg','png','jpg','gif']
 
     def process(self, request, body):
         """
@@ -76,13 +76,40 @@ class ProcessRequest:
             #Adquire a extensão do arquivo solicitado
             requested_extension = request[1].split('.')[-1]
 
-            #Se na requisição houver corpo da mensagem
-            if body:
+            #Verifica se o arquivo foi criado corretamente no diretório,
+            #isso é, a requisição foi feita para o diretório correto "userdata"
 
-                NetUtils.createFile(requested_file, body)
-                self.responseHeader, self.responseBody = self.response.Created(requested_extension)
+            if NetUtils.createFile(request[1], body):
+                #Se existe o arquivo dado na requisição nos diretórios do servidor
+                #E um corpo do arquivo para escrita
+                print("Req: ", NetUtils.find_file(requested_file))
+                if NetUtils.find_file(requested_file) and body:
+                    #Deve-se retornar o código 200 OK para a alteração do arquivo
+                    #com um novo conteúdo.
+                    self.responseHeader, self.responseBody = (
+                        self.response.OK(NetUtils.get_file_path(request[1]),requested_extension)
+                    )
+
+                #Caso o arquivo exista nos diretórios do servidor, mas não foi informado
+                #um corpo na requisição
+                elif NetUtils.find_file(requested_file):
+
+                    #Deve-se retornar o código 204 No Content para a alteração do arquivo
+                    #com um conteúdo vazio.
+                    self.responseHeader, self.responseBody = self.response.NoContent(requested_extension)
+                
+                #Caso não exista o arquivo, cria-se um novo.
+                else:
+
+                    #Retornando o 201 Created com o conteúdo dado (vazio ou não).
+                    self.responseHeader, self.responseBody = self.response.Created(requested_extension)
+            
+            #Caso a requisição foi destinada à outro diretório,
+            #o arquivo será criado de qualquer forma no diretório "userdata"
+            #e a resposta 301 Moved Permanently será exibida com o diretório
+            #correto para o arquivo.
             else:
-                self.responseHeader, self.responseBody = self.response.NoContent(requested_extension)
+                self.responseHeader, self.responseBody = self.response.MovedPermanently(requested_file)
         
         else:
             self.responseHeader, self.responseBody = self.response.BadRequest()
