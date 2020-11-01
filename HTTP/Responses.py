@@ -152,10 +152,8 @@ class Responses:
         Returns:
         (string, string): Header e corpo da resposta.
         """
-        content =  bytes(self.response_general_body.format(
-                "301 Moved Permanently", "301 Moved Permanently",
-                "O arquivo encontra-se em um diretório diferente."
-                ).encode("UTF-8"))
+        content =  ("127.0.0.1:8080/userdata/{}\r\n".format(file)
+                .encode("UTF-8"))
         return (
             self.response_general_header.format(
                 '301',
