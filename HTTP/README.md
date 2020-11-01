@@ -1,110 +1,123 @@
-# Implementação do protocolo HTTP 1.1
+# Projeto HTTP 1.1
 
-## Funcionalidades até o momento
+## O que o servidor pode fazer
 
-O servidor é capaz de:
+- [x]  Fazer requisição do tipo GET para o servidor.
+  - [x]  Retorna um arquivo (se existir) do tipo: .html, .jpeg, .jpg, .png e .gif.
+  - [x]  Se o arquivo não existir, o erro 404 é mostrado (juntamente com um corpo).
+- [x]  Fazer a requisição utilizando o PUT
+  - [x]  Informar para o cliente continuar enviando dados (100 Continue)
+  - [x]  Criar arquivo caso não exista no servidor (201 created)
+  - [x]  Criar o arquivo caso não exista, mas também não existe corpo (204 No Content)
+  - [x]  Se o cliente quiser inserir em qualquer diretório que não seja o "userdata" retornar 301 Moved.
+- [x]  Tratamentos mais gerais.
+  - [x]  Erro do cliente: 400 BadRequest.
+  - [x]  Erro do servidor: 505 HTTPVersionNotSupported.
 
-- [X] Enviar um arquivo para o cliente (utilizando GET).
-  - [X] Tratar o caminho do arquivo.
-  - [X] Tratar vários tipos de arquivos no GET (considerar mimetype)
-  - [X] Tratar erro 404.
+## Instruções para uso
 
-## Funcionalidades do servidor requeridas
+### Instalação do cURL
 
-O servidor deve ser capaz de responder corretamente à diferentes tipos de requisições feitas pelo cliente. Como:
+Antes de verificar as instruções é necessário que seu computador possua o [cURL](https://curl.haxx.se/), um software open source  utilizado em scripts ou linhas de comando para transferir dados. Esse software suporta a transferência de arquivos seguindo diversos tipos de protocolos, entre eles, o protocolo HTTP requisitado no trabalho.
 
-- [ ] Responder enviando um arquivo (como por exemplo uma página).
+Para verificar se seu computador possui o cURL, basta digitar no terminal ou CMD o comando "curl —version". Se existe o software disponível, você receberá uma mensagem como na figura 1.
 
-  - Caso o cliente faça uma requisição do tipo [GET](https://tools.ietf.org/html/rfc7231#section-4.3.1).
+![docs/images/fig1.png](docs/images/fig1.png)
 
-- [ ] Armazenar novos objetos enviados pelo cliente.
+Figura 1: Resposta ao curl —version
 
-  - Caso o cliente faça uma requisição do tipo [PUT](https://tools.ietf.org/html/rfc2616#section-9.6).
+Caso não possua, é possível instalar rapidamente utilizando os comandos:
 
-- [ ] Responder caso o objeto solicitado não existir no servidor.
+sudo apt install curl - Para distribuições como Ubuntu.
 
-  - Nesse caso, verificar as respostas do [servidor](https://tools.ietf.org/html/rfc2616#section-10).
+pacman -Sy curl - Para distribuições como o ArchLinux.
 
-- [ ] Responder caso o objeto foi movido para outro diretório do servidor.
-  
-  - Geralmente, o código de resposta será dado por [301](https://tools.ietf.org/html/rfc2616#page-62).
+yum install curl - Para distribuições como Fedora/CentOS.
 
-## Algumas informações úteis sobre o protocolo
+Ou, caso esteja utilizando o sistema operacional Windows, é possível instalar o executavel a partir da [página de download do cURL](https://curl.haxx.se/download.html).
 
-### Requests
+Após instalar o cURL e certificar que o mesmo está executando corretamente, é possível testar o servidor.
 
-A mensagem de requisição feita pelo cliente ao servidor inclui: o método para aplicar sobre um recurso, um identificador do recurso e a versão do protocolo usada.
-A requisição segue o modelo:
-**Método** SP **Request-URI** SP **HTTP-VERSION** CRLF.
-Onde:
+### Servidor HTTP
 
-- Método: Trata-se do método que será aplicado sobre uma Request-URI.
+O diretório raiz possui:
 
-  - Os métodos podem ser: GET, POST, PUT, DELETE etc. [Mais informação](https://tools.ietf.org/html/rfc2616#section-5.1.1).
+4 arquivos .py correspondentes à funcionalidade do servidor.
 
-- Request-URI: Os Universal Resource Identifiers são strings que identificam - via nome, localização, e qualquer outra característica - um recurso. Ou seja, o Request-URI é o endereço IP, o nome de domínio, ou qualquer outra string que permita alcançar um recurso.
+1 arquivo .html correspondente à página base do servidor.
 
-- HTTP-VESION: Como o nome diz, é a versão do protocolo, para o presente projeto, a única versão suportada é "HTTP/1.1". Caso contrário, o servidor deve retornar um erro.
+1 diretório chamado userdata que armazenará os dados enviados pelo cliente ao servidor à partir de uma requisição do tipo PUT.
 
-- SP: O espaço entre as palavras.
+O arquivo que deverá ser mantido em execução é o **ServerMain.py**, os demais arquivos presentes no diretório raiz são funções auxiliares para que todas as requisições sejam atendidas corretamente.
 
-- CRLF: CR+LF - Carriage Return + Line Feed, ambos combinados preparam uma nova linha (LF) iniciando no lado esquerdo (CR).
+### Adquirindo objetos do servidor a partir do método GET
 
-Portanto, ao combinar todos conhecimentos, temos uma requisição de exemplo dada por:
-GET 127.0.0.1/principal.html HTTP/1.1
+O GET pode ser realizado de duas formas, com o cURL e pelo próprio navegador.
 
-**Se nenhum *target* for especificado após o Request-URI, obrigatoriamente, deve ser o *server root*, dado por "Request-URI/"**
+As respostas podem variar de acordo com a disponibilidade do arquivo no diretório requisitado, erros de sintaxe ou até mesmo a versão do http utilizado na requisição.
 
-### Responses
+De forma geral, a sintaxe do GET (caso utilizando o cURL) será:
 
-Após receber uma requisição, o servidor envia uma resposta.
-
-A primeira linha da resposta consiste na *status_line*, ela segue o modelo: Status-Line = **HTTP-VERSION** SP **Status-Code** SP **Reason-Phrase** CRLF.
-Onde:
-
-- HTTP-VERSION: É a versão do HTTP, no presente projeto é apenas utilizado o HTTP/1.1, caso contrário é retornado erro.
-
-- Status-Code: É um código de três dígitos resultante da tentativa de responder à uma requisição, esses códigos já existem para diversas funcionalidade e podem ser encontrados [aqui](https://tools.ietf.org/html/rfc2616#section-10).
-  - De forma geral, o primeiro dígito faz referência a classe da resposta:
-    - 1xx - Informações
-    - 2xx - Sucesso
-    - 3xx - Redirecionamento
-    - 4xx - Erro de cliente
-    - 5xx - Erro do servidor
-
-- Reason-Phrase: É uma contextualização CURTA do código gerado pelo status-code.
-
-## Considerações feitas em código
-
-Para que o código fique legível para quem quiser trabalhar, foi adotado alguns
-padrões do [PEP-8](https://www.python.org/dev/peps/pep-0008/).
-Esses padrões garantem a correta documentação e entendimento do código.
-A principal alteração considerada é em relação aos comentários.
-
-- Para documentar um método/função em Python, utiliza-se o padrão:
-
-``` python
-def minha_funcao(parametros):
-  """
-  Uma breve descrição da finalidade da função.
-
-  Parameters:
-  nome_do_parametro(tipo): Descrição
-
-  Returns:
-  Descrição do retorno explicitando, se possível,
-  o tipo.
-  """  
-  pass
+```bash
+curl --http1.1 --verbose 127.0.0.1:8080/<objeto_buscado>
 ```
 
-- Além disso, foi adotado o padrão de nomes:
-  
-  - Classe: Primeira letra maíuscula, sem espaço ou hífen.
-    - Ex: MinhaClasse, Classe
-  - Métodos e funções: tudo minúsculo, podendo utilizar o hífen.
-    - Ex: funcao_teste, funcao
+O grupo recomenda utilizar as tags --http1.1 para garantir o uso da versão correta requisitada no projeto e o --verbose para analisar com detalhes como a requisição e respostas foram estruturadas e enviadas.
 
-- E por último, foi adotado a utilização de 79 caracteres por linha. O que
-garante que o leitor visualize o código sem a necessidade de realizar o
-scroll horizontal.
+Um exemplo é dado no gif abaixo, no qual é requisitado o root "/".
+
+![docs/images/curlgetmain.gif](docs/images/curlgetmain.gif)
+
+O mesmo resultado pode ser alcançado através do navegador.
+
+![docs/images/browsergetmain.gif](docs/images/browsergetmain.gif)
+
+Caso seja feita a requisição de um recurso não existente, o erro 404 Not Found será mostrado no terminal ou browser (dependendo a origem da requisição).
+
+![docs/images/browserget404.gif](docs/images/browserget404.gif)
+
+Entre as demais mensagens tratadas, pode-se verificar os erros de Bad Request e Http Version Not Support através do cURL.
+
+Como o BadRequest só é mostrado caso o cliente insira uma sintaxe incorreta (como no caso de métodos que o servidor não suporta, ou até mesmo que não existam), utiliza-se o cURL com o parâmetro -X seguido de um método aleatório, e a resposta esperada será mostrada.
+
+![docs/images/curlget400.gif](docs/images/curlget400.gif)
+
+É possível também visualizar o erro de HTTP Version Not Supported trocando a tag --http1.1 para --http1.0 por exemplo.
+
+Vale lembrar que o servidor, em arquivos existentes no diretório, só retorna o corpo se o arquivo for de algum dos tipos: .html, .txt, .md, .png, .jpg, .jpeg e .gif.
+
+Por exemplo, ao requisitar uma imagem que existe no servidor, e possui a extensão disponível, tem-se a resposta correta.
+
+![docs/images/browsergetimage.gif](docs/images/browsergetimage.gif)
+
+### Colocando arquivos no servidor com o método PUT
+
+A escolha para inserir objetos no servidor foi utilizar o métiodo PUT. Para esse processo, será necessário ter o cURL em mãos.
+
+O comando de inserção é simples:
+
+```bash
+curl --http1.1 --verbose -T <diretorio+arquivo> 127.0.0.1:8080/userdata/<nome_do_arquivo> 
+```
+
+A tag -T serve para o upload de arquivos em um dado url.
+
+É necessário seguir a composição do arquivo de upload informando todo o caminho até o arquivo.
+
+Já o destino do upload será sempre o 127.0.0.1:8080/userdata. Esse diretório é tratado pelo servidor como o destino de todo arquivo inserido pelo método PUT.
+
+![docs/images/put201.gif](docs/images/put201.gif)
+
+Para verificar se o dado foi corretamente inserido, podemos realizar um GET.
+
+![docs/images/getputfile.gif](docs/images/getputfile.gif)
+
+De acordo com a RFC 2616, caso um arquivo requisitado já exista no servidor, o PUT deve o sobrescrever e a resposta deve ser 200 OK caso o conteúdo seja alterado, ou 204 No Content caso o novo arquivo não possua nenhum dado. Então, ao refazer o mesmo PUT, a resposta esperada é 200 OK, pois o arquivo já existe no servidor e o documento enviado possui dados em sua composição.
+
+![docs/images/put200.gif](docs/images/put200.gif)
+
+Agora, se o cliente desejar inserir em qualquer diretório que não seja o "userdata", o servidor irá encarregar-se de criar o arquivo na pasta correta e responder com o código 301, avisando ao usuário que seu recurso foi criado, mas não no url informado.
+
+![docs/images/put301.gif](docs/images/put301.gif)
+
+![docs/images/thatsall.gif](docs/images/thatsall.gif)
