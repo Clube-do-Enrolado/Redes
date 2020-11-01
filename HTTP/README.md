@@ -48,7 +48,8 @@ O diretório raiz possui:
 
 1 diretório chamado userdata que armazenará os dados enviados pelo cliente ao servidor à partir de uma requisição do tipo PUT.
 
-O arquivo que deverá ser mantido em execução é o **ServerMain.py**, os demais arquivos presentes no diretório raiz são funções auxiliares para que todas as requisições sejam atendidas corretamente.
+O arquivo que deverá ser mantido em execução é o **ServerMain.py**, os demais arquivos presentes no diretório raiz são funções auxiliares para que todas as requisições sejam atendidas corretamente. O servidor escuta na porta 8080 do localhost (127.0.0.1), qualquer outra porta utilizada para o contatar não
+funcionará. Caso deseje outra porta, a partir do arquivo ServerMain.py é possível alterar a variável “self.PORTA”, na linha 6, para a porta desejada.
 
 ### Adquirindo objetos do servidor a partir do método GET
 
